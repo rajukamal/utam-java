@@ -1,0 +1,62 @@
+{
+  "elements": [
+    {
+      "name": "first",
+      "selector": {
+        "css": ".foo[%s]",
+        "args": [
+          {
+            "type" : "string",
+            "name" : "selectorArg1"
+          }
+        ]
+      },
+      "type" : ["actionable"]
+    },
+    {
+      "name": "second",
+      "selector": {
+        "css": ".foo[%s]",
+        "args": [
+          {
+            "type" : "string",
+            "name" : "selectorArg2"
+          }
+        ]
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "composeDragAndDrop",
+      "compose": [
+        {
+          "element" : "first",
+          "apply": "dragAndDrop",
+          "args": [
+            {
+              "type": "element",
+              "name": "elementArg"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "composeDragAndDropLiteral",
+      "compose": [
+        {
+          "element" : "first",
+          "apply": "dragAndDrop",
+          "args": [
+            {
+              "value": {
+                "element" : "second"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

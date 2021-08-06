@@ -9,6 +9,7 @@ package utam.core.framework.element;
 
 import org.openqa.selenium.Keys;
 import utam.core.driver.Expectations;
+import utam.core.element.BasicElement;
 import utam.core.element.Element;
 import utam.core.element.RootElement;
 import utam.core.element.Element.GestureDirection;
@@ -178,5 +179,10 @@ public class BasePageElement extends UtamBaseImpl implements RootElement {
   @Override
   public boolean flickItems(GestureDirection direction) {
     return getElement().flickItems(direction);
+  }
+
+  @Override
+  public void dragAndDrop(BasicElement target) {
+    getElement().dragAndDrop(factory.getDriver(), ((BasePageElement)target).getElement());
   }
 }

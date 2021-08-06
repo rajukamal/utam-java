@@ -70,6 +70,14 @@ public interface Element {
   boolean flickItems(GestureDirection direction);
 
   /**
+   * drag and drop an element to the target location
+   *
+   * @param target location where to drop
+   * @param driver instance of the driver, needed for custom actions
+   */
+  void dragAndDrop(Driver driver, Element target);
+
+  /**
    * types of scroll action
    */
   enum ScrollOptions {

@@ -9,6 +9,7 @@ package utam.compiler.grammar;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
@@ -281,6 +282,7 @@ public class UtamMethodAction_Tests {
     ComposeMethodStatement actionObject = getVoidStatement(action, context);
     assertThat(actionObject, is(instanceOf(ComposeMethodStatement.Utility.class)));
     assertThat(actionObject.getReturnType().isSameType(VOID), is(true));
+    assertThat(actionObject.getParameters(), hasSize(1));
     assertThat(actionObject.getParameters().get(0).getValue(), is(equalTo("strParameter")));
     assertThat(
             getSingleCodeLine(actionObject),

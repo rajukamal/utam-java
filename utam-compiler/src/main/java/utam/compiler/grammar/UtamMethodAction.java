@@ -19,8 +19,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import utam.compiler.helpers.*;
+import utam.compiler.grammar.UtamArgument.ArgsProcessor;
+import utam.compiler.helpers.ActionType;
+import utam.compiler.helpers.BasicElementActionType;
+import utam.compiler.helpers.ElementContext;
+import utam.compiler.helpers.MatcherType;
+import utam.compiler.helpers.MethodContext;
+import utam.compiler.helpers.PrimitiveType;
+import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.ComposeMethodStatement;
 import utam.compiler.representation.ComposeMethodStatement.BasicElementOperation;
 import utam.compiler.representation.ComposeMethodStatement.ElementOperand;
@@ -79,10 +85,10 @@ class UtamMethodAction {
     this(null, null, null, null, applyExternal);
   }
 
-  private Operation getCustomOperation(MethodContext methodContext) {
-    List<MethodParameter> parameters = UtamArgument
-        .getArgsProcessor(args, null, methodContext.getName())
-        .getOrdered()
+  private Operation getCustomOperation(TranslationContext context, MethodContext methodContext) {
+    ArgsProcessor argsProcessor = new ArgsProcessor(context, methodContext);
+    List<MethodParameter> parameters = argsProcessor
+        .getParameters(args)
         .stream()
         .map(methodContext::setStatementArg)
         .collect(Collectors.toList());
@@ -93,9 +99,8 @@ class UtamMethodAction {
   }
 
   private Operation getWaitForOperation(TranslationContext context, MethodContext methodContext) {
-    List<TypeProvider> expectedParameters = Collections.singletonList(FUNCTION);
-    List<MethodParameter> parameters = UtamArgument
-        .getArgsProcessor(args, expectedParameters, methodContext.getName()).getOrdered();
+    List<MethodParameter> parameters = new ArgsProcessor(context, methodContext, Collections.singletonList(FUNCTION))
+        .getParameters(args);
     // return type is irrelevant at statement level as we don't assign except for last statement
     ActionType action = new Custom(apply, methodContext.getReturnType(VOID), parameters);
     List<ComposeMethodStatement> predicate = args[0].getPredicate(context, methodContext);
@@ -103,7 +108,7 @@ class UtamMethodAction {
         PrimitiveType.BOOLEAN), predicate);
   }
 
-  private Operation getBasicOperation(ElementContext element, MethodContext methodContext) {
+  private Operation getBasicOperation(TranslationContext context, ElementContext element, MethodContext methodContext) {
     ActionType action = getActionType(apply, element.getType(), element.getName());
     if (BasicElementActionType.containsElement.getApplyString().equals(apply) && args.length == 1) {
       // If the action is "containsElement", it may have one argument (a selector),
@@ -112,12 +117,14 @@ class UtamMethodAction {
       // it can be assumed to be false, so substitute that value here.
       args = new UtamArgument[]{args[0], new UtamArgument(Boolean.FALSE)};
     }
-    List<MethodParameter> parameters = UtamArgument
-        .getArgsProcessor(args, action.getParametersTypes(), methodContext.getName())
-        .getOrdered()
+    List<MethodParameter> parameters = new ArgsProcessor(context, methodContext, action.getParametersTypes())
+        .getParameters(args)
         .stream()
         .map(methodContext::setStatementArg)
         .collect(Collectors.toList());
+    if(matcher != null) {
+      matcher.checkOperandForMatcher(action.getReturnType(), String.format("method '%s'", methodContext.getName()));
+    }
     return new BasicElementOperation(action, parameters);
   }
 
@@ -129,10 +136,9 @@ class UtamMethodAction {
    * @param methodContext context of the current method being compiled
    * @return an operation that represents the structure of an imperative extension statement
    */
-  private Operation getUtilityOperation(MethodContext methodContext) {
-    List<MethodParameter> parameters = UtamArgument
-        .getArgsProcessor(applyExternal.args, null, methodContext.getName())
-        .getOrdered()
+  private Operation getUtilityOperation(TranslationContext context, MethodContext methodContext) {
+    List<MethodParameter> parameters = new ArgsProcessor(context, methodContext)
+        .getParameters(applyExternal.args)
         .stream()
         .map(methodContext::setStatementArg)
         .collect(Collectors.toList());
@@ -205,8 +211,9 @@ class UtamMethodAction {
               isLastPredicateStatement)
               : new ComposeMethodStatement.ReturnsList(operand, operation, isLastPredicateStatement);
     }
-    return new ComposeMethodStatement.Single(operand, operation, getMatcherType(),
-        getMatcherParameters(methodContext), isLastPredicateStatement);
+    MatcherType matcherType = matcher == null? null : matcher.getMatcherType();
+    return new ComposeMethodStatement.Single(operand, operation, matcherType,
+        getMatcherParameters(context, methodContext), isLastPredicateStatement);
   }
 
   // for waitFor or isPresent element can only be single and non document
@@ -230,30 +237,23 @@ class UtamMethodAction {
 
   private Operation getOperation(TranslationContext context, MethodContext methodContext) {
     if (applyExternal != null) {
-      return getUtilityOperation(methodContext);
+      return getUtilityOperation(context, methodContext);
     }
     if (isWaitForAction()) {
       return getWaitForOperation(context, methodContext);
     }
     ElementContext element = context.getElement(elementName);
     if (element.isCustomElement() || element.isDocumentElement() || element.isSelfElement()) {
-      return getCustomOperation(methodContext);
+      return getCustomOperation(context, methodContext);
     }
-    return getBasicOperation(element, methodContext);
+    return getBasicOperation(context, element, methodContext);
   }
 
-  private List<MethodParameter> getMatcherParameters(MethodContext methodContext) {
+  private List<MethodParameter> getMatcherParameters(TranslationContext context, MethodContext methodContext) {
     if (matcher == null) {
       return null;
     }
-    return matcher.getParameters(String.format("method '%s'", methodContext.getName()));
-  }
-
-  private MatcherType getMatcherType() {
-    if (matcher == null) {
-      return null;
-    }
-    return this.matcher.matcherType;
+    return matcher.getParameters(context, methodContext);
   }
 
   private boolean isWaitForAction() {

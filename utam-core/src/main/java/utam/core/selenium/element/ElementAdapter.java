@@ -11,6 +11,8 @@ import static utam.core.selenium.element.DriverAdapter.ERR_SUPPORTED_FOR_MOBILE;
 import static utam.core.selenium.element.DriverAdapter.find;
 import static utam.core.selenium.element.DriverAdapter.findList;
 import static utam.core.selenium.element.DriverAdapter.getNotFoundErr;
+import static utam.core.selenium.element.DriverAdapter.getSeleniumDriver;
+import static utam.core.selenium.element.DriverAdapter.getSeleniumDriverActions;
 
 import java.util.Collections;
 import java.util.List;
@@ -20,7 +22,9 @@ import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Action;
 import org.openqa.selenium.interactions.Actions;
 import utam.core.driver.Driver;
 import utam.core.element.Element;
@@ -219,13 +223,16 @@ public class ElementAdapter implements Element {
 
   @Override
   public void moveTo(Driver driver) {
-    Actions actions = new Actions(((DriverAdapter) driver).getSeleniumDriver());
+    Actions actions = getSeleniumDriverActions(driver);
     actions.moveToElement(getWebElement()).perform();
   }
 
   @Override
   public boolean hasFocus(Driver driver) {
-    return ((DriverAdapter) driver).getSeleniumDriver().switchTo().activeElement()
+    WebDriver webDriver = getSeleniumDriver(driver);
+    return webDriver
+        .switchTo()
+        .activeElement()
         .equals(getWebElement());
   }
 
@@ -247,5 +254,22 @@ public class ElementAdapter implements Element {
   @Override
   public void flick(Driver driver, int xOffset, int yOffset) {
     throw new IllegalStateException(ERR_SUPPORTED_FOR_MOBILE);
+  }
+
+  @Override
+  public void dragAndDrop(Driver driver, Element target) {
+    WebElement from = getWebElement();
+    WebElement to = ((ElementAdapter)target).getWebElement();
+    // create an object of Actions class to build composite actions
+    Actions builder = getSeleniumDriverActions(driver);
+
+    // build a drag and drop action
+    Action dragAndDrop = builder.clickAndHold(from)
+        .moveToElement(to)
+        .release(to)
+        .build();
+
+    // perform the drag and drop action
+    dragAndDrop.perform();
   }
 }

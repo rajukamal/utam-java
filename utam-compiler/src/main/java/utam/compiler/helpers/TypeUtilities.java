@@ -69,8 +69,9 @@ public final class TypeUtilities {
     }
   };
   public static final TypeProvider ELEMENT_FIELD = new FromClass(ElementLocation.class);
+  public static final TypeProvider BASIC_ELEMENT = new FromClass(BasicElement.class);
 
-  static final String CONTAINER_ELEMENT_TYPE = "container";
+  public static final String CONTAINER_ELEMENT_TYPE = "container";
   public static final String ERR_TYPE_INVALID_VALUE_TYPE =
       "%s '%s': type must be %s, a Page Object type reference, or an array of basic element interfaces";
   public static final String ERR_TYPE_PROPERTY_INVALID_STRING_VALUE =
@@ -167,7 +168,7 @@ public final class TypeUtilities {
       this.type = type;
     }
 
-    public static boolean isBasicType(String jsonString) {
+    static boolean isBasicType(String jsonString) {
       for (TypeUtilities.BasicElementInterface type : TypeUtilities.BasicElementInterface.values()) {
         if (type.name().equals(jsonString)) {
           return true;

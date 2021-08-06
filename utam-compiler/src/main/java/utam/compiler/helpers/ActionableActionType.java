@@ -32,6 +32,10 @@ public enum ActionableActionType implements ActionType {
    */
   blur(null),
   /**
+   * drag and drop current element to the location provided as an element parameter
+   */
+  dragAndDrop(null, TypeUtilities.BASIC_ELEMENT),
+  /**
    * focus on the value <br>
    * throws exception if fails
    */

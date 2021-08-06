@@ -249,4 +249,10 @@ public class ElementAdapterTests {
     assertThrows(() -> mock.getElementAdapter().flick(mock.getDriverAdapter(), 0, 0));
     assertThrows(() -> mock.getElementAdapter().flickItems(GestureDirection.DOWN));
   }
+
+  @Test
+  public void testDragAndDrop() {
+    MockUtilities mock = new MockUtilities.MockDriver();
+    mock.getElementAdapter().dragAndDrop(mock.getDriverAdapter(), mock.getElementAdapter());
+  }
 }

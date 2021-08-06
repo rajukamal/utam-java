@@ -24,6 +24,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.FluentWait;
 import utam.core.driver.Driver;
 import utam.core.driver.Expectations;
@@ -103,6 +104,15 @@ public class DriverAdapter implements Driver {
       throw new NoSuchElementException(getNotFoundErr(by));
     }
     return founds;
+  }
+
+  static WebDriver getSeleniumDriver(Driver driver) {
+    return ((DriverAdapter) driver).getSeleniumDriver();
+  }
+
+  static Actions getSeleniumDriverActions(Driver driver) {
+    WebDriver webDriver = getSeleniumDriver(driver);
+    return new Actions(webDriver);
   }
 
   private Function<WebElement, Element> getElementBuilder() {
