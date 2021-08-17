@@ -30,6 +30,7 @@ import utam.core.driver.Driver;
 import utam.core.element.Element;
 import utam.core.element.FindContext;
 import utam.core.element.Locator;
+import utam.core.framework.UtamCoreError;
 import utam.core.selenium.appium.MobileElementAdapter;
 
 /**
@@ -60,6 +61,7 @@ public class ElementAdapter implements Element {
       "element is still not visible or clickable after scroll into view";
   private static final String SCROLL_TO_DOCUMENT_ORIGIN_JS =
       "window.scrollTo(0,0);";
+  static final String ERR_DRAG_AND_DROP_OPTIONS = "Either target element of offset should be set for drag and drop";
   private final WebElement webElement;
 
   public ElementAdapter(WebElement element) {
@@ -257,18 +259,24 @@ public class ElementAdapter implements Element {
   }
 
   @Override
-  public void dragAndDrop(Driver driver, Element target) {
+  public void dragAndDrop(Driver driver, DragAndDropOptions options) {
     WebElement from = getWebElement();
-    WebElement to = ((ElementAdapter)target).getWebElement();
     // create an object of Actions class to build composite actions
-    Actions builder = getSeleniumDriverActions(driver);
-
+    Actions builder = getSeleniumDriverActions(driver).clickAndHold(from);
+    if(options.getHoldDuration() != null && !options.getHoldDuration().isZero()) {
+      builder.pause(options.getHoldDuration());
+    }
+    if(options.getTargetElement() != null) {
+      WebElement to = ((ElementAdapter) options.getTargetElement()).getWebElement();
+      builder.moveToElement(to).release(to);
+    } else if(options.getOffset() != null) {
+      CoordinatesOffset offset = options.getOffset();
+      builder.moveByOffset(offset.getX(), offset.getY()).release();
+    } else {
+      throw new UtamCoreError(ERR_DRAG_AND_DROP_OPTIONS);
+    }
     // build a drag and drop action
-    Action dragAndDrop = builder.clickAndHold(from)
-        .moveToElement(to)
-        .release(to)
-        .build();
-
+    Action dragAndDrop = builder.build();
     // perform the drag and drop action
     dragAndDrop.perform();
   }

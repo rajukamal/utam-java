@@ -22,6 +22,7 @@ import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Actionable;
 import utam.core.element.BasicElement;
 import utam.core.element.Clickable;
+import utam.core.element.Draggable;
 import utam.core.element.Editable;
 import utam.core.element.ElementLocation;
 import utam.core.element.RootElement;
@@ -159,6 +160,7 @@ public final class TypeUtilities {
   public enum BasicElementInterface implements TypeProvider {
     actionable(Actionable.class),
     clickable(Clickable.class),
+    draggable(Draggable.class),
     editable(Editable.class),
     touchable(Touchable.class);
 

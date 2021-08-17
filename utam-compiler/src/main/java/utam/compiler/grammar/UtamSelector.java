@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 import utam.compiler.grammar.UtamArgument.ArgsProcessor;
+import utam.compiler.grammar.UtamArgument.ArgsProcessorWithExpectedTypes;
 import utam.compiler.helpers.LocatorCodeGeneration;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
@@ -95,7 +96,9 @@ public class UtamSelector extends UtamRootSelector {
    */
   public LocatorCodeGeneration getCodeGenerationHelper(TranslationContext translationContext) {
     if (context == null) {
-      ArgsProcessor argsProcessor = new SelectorArgsProcessor(translationContext);
+      ArgsProcessor argsProcessor = new ArgsProcessorWithExpectedTypes(translationContext,
+          String.format("selector '%s'", getLocator().getStringValue()),
+          getParametersTypes(getLocator().getStringValue()));
       context = new LocatorCodeGeneration(getSelectorType(), getLocator(),
           argsProcessor.getParameters(args));
     }
@@ -104,13 +107,5 @@ public class UtamSelector extends UtamRootSelector {
 
   boolean isReturnAll() {
     return isReturnAll;
-  }
-
-  private class SelectorArgsProcessor extends ArgsProcessor {
-
-    SelectorArgsProcessor(TranslationContext translationContext) {
-      super(translationContext, String.format("selector '%s'", getLocator().getStringValue()),
-          getParametersTypes(getLocator().getStringValue()));
-    }
   }
 }

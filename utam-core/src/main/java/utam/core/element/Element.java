@@ -7,6 +7,7 @@
  */
 package utam.core.element;
 
+import java.time.Duration;
 import java.util.List;
 import utam.core.driver.Driver;
 
@@ -72,10 +73,10 @@ public interface Element {
   /**
    * drag and drop an element to the target location
    *
-   * @param target location where to drop
+   * @param options location where to drop as element or coordinates offset and optional hold duration
    * @param driver instance of the driver, needed for custom actions
    */
-  void dragAndDrop(Driver driver, Element target);
+  void dragAndDrop(Driver driver, DragAndDropOptions options);
 
   /**
    * types of scroll action
@@ -93,5 +94,28 @@ public interface Element {
     UP,
     LEFT,
     RIGHT
+  }
+
+  interface DragAndDropOptions {
+
+    default Duration getHoldDuration() {
+      return null;
+    }
+
+    default Element getTargetElement() {
+      return null;
+    }
+
+    default CoordinatesOffset getOffset() {
+      return null;
+    }
+
+  }
+
+  interface CoordinatesOffset {
+
+    int getX();
+
+    int getY();
   }
 }

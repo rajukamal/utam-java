@@ -49,11 +49,4 @@ public interface Actionable extends BasicElement {
    * Throws exception if element not found within timeout or element could not be scrolled to center
    */
   void blur();
-
-  /**
-   * drag and drop an element to the target location
-   *
-   * @param target location where to drop
-   */
-  void dragAndDrop(BasicElement target);
 }

@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.grammar.UtamArgument.ArgsProcessor;
+import utam.compiler.grammar.UtamArgument.ArgsProcessorWithExpectedTypes;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ParameterUtils.Literal;
 import utam.compiler.helpers.PrimitiveType;
@@ -235,7 +236,7 @@ class UtamArgumentDeserializer extends
           .map(MethodParameter::getType)
           .collect(Collectors.toList());
       ArgsProcessor argsProcessor =
-          new ArgsProcessor(translationContext,
+          new ArgsProcessorWithExpectedTypes(translationContext,
               String.format("element '%s' reference", elementName), expectedElementArgs);
       return argsProcessor.getParameters(args);
     }

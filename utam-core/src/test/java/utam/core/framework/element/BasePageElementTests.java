@@ -256,5 +256,6 @@ public class BasePageElementTests {
   public void testDragAndDrop() {
     MockUtilities mock = new MockUtilities();
     mock.getUtamElement().dragAndDrop(mock.getUtamElement());
+    mock.getUtamElement().dragAndDrop(1,2);
   }
 }

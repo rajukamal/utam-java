@@ -7,10 +7,13 @@
  */
 package utam.core.framework.element;
 
+import java.time.Duration;
 import org.openqa.selenium.Keys;
 import utam.core.driver.Expectations;
 import utam.core.element.BasicElement;
 import utam.core.element.Element;
+import utam.core.element.Element.CoordinatesOffset;
+import utam.core.element.Element.DragAndDropOptions;
 import utam.core.element.RootElement;
 import utam.core.element.Element.GestureDirection;
 import utam.core.element.Element.ScrollOptions;
@@ -31,6 +34,7 @@ public class BasePageElement extends UtamBaseImpl implements RootElement {
 
   public BasePageElement() {}
 
+  // used via java reflections
   public BasePageElement(PageObjectsFactory factory, Element element) {
     this.element = element;
     this.factory = factory;
@@ -183,6 +187,70 @@ public class BasePageElement extends UtamBaseImpl implements RootElement {
 
   @Override
   public void dragAndDrop(BasicElement target) {
-    getElement().dragAndDrop(factory.getDriver(), ((BasePageElement)target).getElement());
+    DragAndDropOptions options = new DragAndDropOptions() {
+      @Override
+      public Element getTargetElement() {
+        return ((BasePageElement)target).getElement();
+      }
+    };
+    getElement().dragAndDrop(factory.getDriver(), options);
+  }
+
+  @Override
+  public void dragAndDrop(int xOffset, int yOffset) {
+    DragAndDropOptions options = new DragAndDropOptions() {
+      @Override
+      public CoordinatesOffset getOffset() {
+        return new CoordinatesOffset() {
+          @Override
+          public int getX() {
+            return xOffset;
+          }
+
+          @Override
+          public int getY() {
+            return yOffset;
+          }
+        };
+      }
+    };
+    getElement().dragAndDrop(factory.getDriver(), options);
+  }
+
+  @Override
+  public void dragAndDrop(BasicElement target, int holdDurationSec) {
+    DragAndDropOptions options = new DragAndDropOptions() {
+      @Override
+      public Element getTargetElement() {
+        return ((BasePageElement)target).getElement();
+      }
+
+      @Override
+      public Duration getHoldDuration() {
+        return Duration.ofSeconds(holdDurationSec);
+      }
+    };
+    getElement().dragAndDrop(factory.getDriver(), options);
+  }
+
+  @Override
+  public void dragAndDrop(int xOffset, int yOffset, int holdDurationSec) {
+    DragAndDropOptions options = new DragAndDropOptions() {
+      @Override
+      public CoordinatesOffset getOffset() {
+        return new CoordinatesOffset() {
+          @Override
+          public int getX() {
+            return xOffset;
+          }
+
+          @Override
+          public int getY() {
+            return yOffset;
+          }
+        };
+      }
+    };
+    getElement().dragAndDrop(factory.getDriver(), options);
   }
 }

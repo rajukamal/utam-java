@@ -358,7 +358,7 @@ public class UtamMethodAction_Tests {
     TranslationContext context = TestUtilities.getTestTranslationContext();
     TestUtilities.UtamEntityCreator.createUtamElement(
         ELEMENT_NAME, new String[] { clickable.name() }, getListSelector(), true).testTraverse(context);
-    final String applyStr = click.getInvokeMethodName();
+    final String applyStr = click.getApplyString();
     TypeProvider returns = BOOLEAN;
     UtamMethodAction action =
         new UtamMethodAction(
@@ -377,7 +377,7 @@ public class UtamMethodAction_Tests {
     TranslationContext context = TestUtilities.getTestTranslationContext();
     TestUtilities.UtamEntityCreator.createUtamElement(
         ELEMENT_NAME, new String[] { clickable.name() }, getListSelector(), true).testTraverse(context);
-    final String applyStr = getText.getInvokeMethodName();
+    final String applyStr = getText.getApplyString();
     UtamMethodAction action =
         new UtamMethodAction(
             ELEMENT_NAME, applyStr);

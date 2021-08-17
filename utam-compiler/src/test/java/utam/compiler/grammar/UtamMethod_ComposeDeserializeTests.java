@@ -482,24 +482,49 @@ public class UtamMethod_ComposeDeserializeTests {
   @Test
   public void testDragAndDropWithElementNonLiteral() {
     TranslationContext context = new DeserializerUtilities().getContext("composeDragAndDrop");
-    MethodInfo methodInfo = new MethodInfo("composeDragAndDrop");
+    final String methodName = "composeDragAndDropElement";
+    MethodInfo methodInfo = new MethodInfo(methodName);
     methodInfo.addImportedTypes(BASIC_ELEMENT.getFullName());
     methodInfo.addImpliedImportedTypes(BASIC_ELEMENT.getFullName());
     methodInfo.addParameter(new MethodParameterInfo("selectorArg1"));
-    methodInfo.addParameter(new MethodParameterInfo("elementArg", BASIC_ELEMENT.getSimpleName()));
+    methodInfo.addParameter(new MethodParameterInfo("elementArg", BASIC_ELEMENT));
     methodInfo.addCodeLine("this.getFirstElement(selectorArg1).dragAndDrop(elementArg)");
-    PageObjectMethod method = context.getMethod("composeDragAndDrop");
+    PageObjectMethod method = context.getMethod(methodName);
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
 
   @Test
-  public void testDragAndDropWithElementLiteral() {
+  public void testDragAndDropWithElementLiteralDuration() {
     TranslationContext context = new DeserializerUtilities().getContext("composeDragAndDrop");
-    PageObjectMethod method = context.getMethod("composeDragAndDropLiteral");
-    MethodInfo methodInfo = new MethodInfo("composeDragAndDropLiteral");
+    final String methodName = "composeDragAndDropElementLiteralWithDuration";
+    MethodInfo methodInfo = new MethodInfo(methodName);
     methodInfo.addParameter(new MethodParameterInfo("selectorArg1"));
     methodInfo.addParameter(new MethodParameterInfo("selectorArg2"));
-    methodInfo.addCodeLine("this.getFirstElement(selectorArg1).dragAndDrop(this.getSecondElement(selectorArg2))");
+    methodInfo.addCodeLine("this.getFirstElement(selectorArg1).dragAndDrop(this.getSecond(selectorArg2), 2)");
+    PageObjectMethod method = context.getMethod(methodName);
+    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+  }
+
+  @Test
+  public void testDragAndDropWithOffset() {
+    TranslationContext context = new DeserializerUtilities().getContext("composeDragAndDrop");
+    final String methodName = "composeDragAndDropWithOffset";
+    PageObjectMethod method = context.getMethod(methodName);
+    MethodInfo methodInfo = new MethodInfo(methodName);
+    methodInfo.addParameter(new MethodParameterInfo("x", PrimitiveType.NUMBER));
+    methodInfo.addParameter(new MethodParameterInfo("y", PrimitiveType.NUMBER));
+    methodInfo.addCodeLine("this.getSimplePublic().dragAndDrop(x, y)");
+    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+  }
+
+  @Test
+  public void testDragAndDropWithOffsetDuration() {
+    TranslationContext context = new DeserializerUtilities().getContext("composeDragAndDrop");
+    final String methodName = "composeDragAndDropWithOffsetDuration";
+    PageObjectMethod method = context.getMethod(methodName);
+    MethodInfo methodInfo = new MethodInfo(methodName);
+    methodInfo.addParameter(new MethodParameterInfo("duration", PrimitiveType.NUMBER));
+    methodInfo.addCodeLine("this.getSimplePublic().dragAndDrop(1, 2, duration)");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
 

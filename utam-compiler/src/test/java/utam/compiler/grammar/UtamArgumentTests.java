@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.testng.annotations.Test;
 import utam.compiler.grammar.UtamArgument.ArgsProcessor;
+import utam.compiler.grammar.UtamArgument.ArgsProcessorWithExpectedTypes;
 import utam.compiler.grammar.UtamArgumentDeserializer.ElementReference;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ElementContext.Basic;
@@ -59,14 +60,13 @@ public class UtamArgumentTests {
   private static final String ARGS_CONTEXT = "test";
 
   private static List<MethodParameter> getOrderedArgs(UtamArgument[] args) {
-    ArgsProcessor argsProcessor = new ArgsProcessor(getTestTranslationContext(), ARGS_CONTEXT,
-        null);
+    ArgsProcessor argsProcessor = new ArgsProcessor(getTestTranslationContext(), ARGS_CONTEXT);
     return argsProcessor.getParameters(args);
   }
 
   private static List<MethodParameter> getOrderedArgs(UtamArgument[] args,
       List<TypeProvider> expectedTypes) {
-    ArgsProcessor argsProcessor = new ArgsProcessor(getTestTranslationContext(), ARGS_CONTEXT,
+    ArgsProcessor argsProcessor = new ArgsProcessorWithExpectedTypes(getTestTranslationContext(), ARGS_CONTEXT,
         expectedTypes);
     return argsProcessor.getParameters(args);
   }
@@ -74,8 +74,12 @@ public class UtamArgumentTests {
   private static MethodParameter getParameter(UtamArgument utamArgument,
       TypeProvider expectedType) {
     TranslationContext translationContext = getTestTranslationContext();
-    ArgsProcessor argsProcessor = new ArgsProcessor(translationContext, ARGS_CONTEXT, null);
-    return argsProcessor.getParameter(utamArgument, expectedType);
+    ArgsProcessor argsProcessor = new ArgsProcessor(translationContext, ARGS_CONTEXT);
+    MethodParameter parameter = argsProcessor.getParameter(utamArgument);
+    if(parameter != null) {
+      argsProcessor.checkExpectedType(expectedType, parameter.getType());
+    }
+    return parameter;
   }
 
   @Test
@@ -135,7 +139,7 @@ public class UtamArgumentTests {
     ElementContext elementContext = new Basic("element");
     context.setElement(elementContext);
     elementContext.setElementMethod(new ElementMethod.Single(elementContext, true));
-    ArgsProcessor processor = new ArgsProcessor(context, ARGS_CONTEXT,
+    ArgsProcessor processor = new ArgsProcessorWithExpectedTypes(context, ARGS_CONTEXT,
         Arrays.asList(PrimitiveType.STRING,
             PrimitiveType.NUMBER,
             PrimitiveType.BOOLEAN, BASIC_ELEMENT,
@@ -168,7 +172,7 @@ public class UtamArgumentTests {
     ElementContext elementContext = new Basic("element");
     context.setElement(elementContext);
     elementContext.setElementMethod(new ElementMethod.Single(elementContext, true));
-    ArgsProcessor processor = new ArgsProcessor(context, ARGS_CONTEXT, null);
+    ArgsProcessor processor = new ArgsProcessor(context, ARGS_CONTEXT);
     List<MethodParameter> parameters =
         processor.getParameters(
             new UtamArgument[]{

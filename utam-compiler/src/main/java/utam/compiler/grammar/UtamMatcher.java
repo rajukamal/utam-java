@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.grammar.UtamArgument.ArgsProcessor;
+import utam.compiler.grammar.UtamArgument.ArgsProcessorWithExpectedTypes;
 import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.TranslationContext;
@@ -40,19 +41,15 @@ class UtamMatcher {
 
   // get parameters for a matcher inside element's filter
   List<MethodParameter> getParameters(TranslationContext context, String elementName) {
-    String argsContextString = String
-        .format("matcher '%s' for element '%s'", matcherType, elementName);
-    ArgsProcessor argsProcessor = new ArgsProcessor(context, argsContextString,
-        matcherType.getExpectedParametersTypes());
+    String argsContextString = String.format("element '%s'", elementName);
+    ArgsProcessor argsProcessor = new ArgsProcessorWithExpectedTypes(context, argsContextString, matcherType);
     return argsProcessor.getParameters(args);
   }
 
   // get parameters for a matcher inside method
   List<MethodParameter> getParameters(TranslationContext context, MethodContext methodContext) {
-    String argsContextString = String
-        .format("matcher '%s' in method '%s'", matcherType, methodContext.getName());
-    ArgsProcessor argsProcessor = new ArgsProcessor(context, argsContextString,
-        matcherType.getExpectedParametersTypes());
+    String argsContextString = String.format("method '%s'", methodContext.getName());
+    ArgsProcessor argsProcessor = new ArgsProcessorWithExpectedTypes(context, argsContextString, matcherType);
     return argsProcessor.getParameters(args);
   }
 

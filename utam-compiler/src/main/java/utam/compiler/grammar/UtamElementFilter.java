@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import utam.compiler.grammar.UtamArgument.ArgsProcessor;
+import utam.compiler.grammar.UtamArgument.ArgsProcessorBasicAction;
 import utam.compiler.helpers.ActionType;
 import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.TranslationContext;
@@ -53,15 +54,13 @@ final class UtamElementFilter {
       TranslationContext context, UtamElement.Type elementNodeType, TypeProvider elementType,
       String elementName) {
     String contextString = String.format("element '%s' filter", elementName);
-    ArgsProcessor argsProcessor;
     if (elementNodeType == UtamElement.Type.BASIC) {
       ActionType actionType = getActionType(this.applyMethod, elementType, elementName);
       matcher.checkOperandForMatcher(actionType.getReturnType(), contextString);
-      argsProcessor = new ArgsProcessor(context, contextString, actionType.getParametersTypes());
+      this.applyMethodParameters = new ArgsProcessorBasicAction(context, contextString, actionType).getParameters(applyArgs);
     } else {
-      argsProcessor = new ArgsProcessor(context, contextString, null);
+      this.applyMethodParameters = new ArgsProcessor(context, contextString).getParameters(applyArgs);
     }
-    this.applyMethodParameters = argsProcessor.getParameters(applyArgs);
     this.matcherParameters = this.matcher.getParameters(context, elementName);
   }
 

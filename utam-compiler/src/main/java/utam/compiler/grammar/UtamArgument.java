@@ -12,7 +12,6 @@ import static utam.compiler.helpers.PrimitiveType.NUMBER;
 import static utam.compiler.helpers.PrimitiveType.STRING;
 import static utam.compiler.helpers.PrimitiveType.isPrimitiveType;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
-import static utam.compiler.helpers.TypeUtilities.FUNCTION;
 import static utam.compiler.helpers.TypeUtilities.REFERENCE;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 
@@ -23,7 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.grammar.UtamArgumentDeserializer.ElementReference;
+import utam.compiler.helpers.ActionType;
 import utam.compiler.helpers.LocatorCodeGeneration;
+import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ParameterUtils.Literal;
 import utam.compiler.helpers.ParameterUtils.Regular;
@@ -40,7 +41,7 @@ import utam.core.declarative.representation.TypeProvider;
  * @since 228
  */
 @JsonDeserialize(using = UtamArgumentDeserializer.class)
-class UtamArgument {
+public class UtamArgument {
 
   static final String FUNCTION_TYPE_PROPERTY = "function";
   static final String SELECTOR_TYPE_PROPERTY = "locator";
@@ -55,7 +56,7 @@ class UtamArgument {
   private final UtamMethodAction[] conditions;
 
   @JsonCreator
-  UtamArgument(
+  public UtamArgument(
       @JsonProperty(value = "value") Object value,
       @JsonProperty(value = "name") String name,
       @JsonProperty(value = "type") String type,
@@ -74,7 +75,7 @@ class UtamArgument {
     this(null, name, type, null);
   }
 
-  UtamArgument(Object value) {
+  public UtamArgument(Object value) {
     this(value, null, null, null);
   }
 
@@ -136,66 +137,37 @@ class UtamArgument {
   static class ArgsProcessor {
 
     final String validationString;
-    private final List<MethodParameter> parameters = new ArrayList<>();
-    private final TranslationContext translationContext;
-    private final List<TypeProvider> expectedParametersTypes;
+    final List<MethodParameter> parameters = new ArrayList<>();
+    final TranslationContext context;
 
-    ArgsProcessor(TranslationContext translationContext, String validationString,
-        List<TypeProvider> expectedParametersTypes) {
+    ArgsProcessor(TranslationContext translationContext, String validationString) {
       this.validationString = validationString;
-      this.translationContext = translationContext;
-      this.expectedParametersTypes = expectedParametersTypes;
-    }
-
-    ArgsProcessor(TranslationContext context, MethodContext methodContext,
-        List<TypeProvider> expectedParametersTypes) {
-      this(context, String.format("method '%s'", methodContext.getName()), expectedParametersTypes);
+      this.context = translationContext;
     }
 
     ArgsProcessor(TranslationContext context, MethodContext methodContext) {
-      this(context, String.format("method '%s'", methodContext.getName()), null);
+      this(context, String.format("method '%s'", methodContext.getName()));
     }
 
     List<MethodParameter> getParameters(UtamArgument[] args) {
-      int actualCnt = args == null ? 0 : args.length;
-      if (expectedParametersTypes != null && expectedParametersTypes.size() != actualCnt) {
-        throw new UtamCompilationError(String.format(ERR_ARGS_WRONG_COUNT,
-            validationString,
-            expectedParametersTypes.size(),
-            actualCnt));
-      }
       if (args == null) {
         return parameters;
       }
-      for (int i = 0; i < args.length; i++) {
-        UtamArgument arg = args[i];
-        TypeProvider expectedType =
-            expectedParametersTypes == null ? null : expectedParametersTypes.get(i);
-        getParameter(arg, expectedType);
+      for(UtamArgument argument: args) {
+        parameters.add(getParameter(argument));
       }
       return parameters;
     }
 
-    void checkExpectedType(TypeProvider expectedType, TypeProvider actualType) {
-      if (expectedType != null && !actualType.isSameType(expectedType)) {
-        throw new UtamCompilationError(String.format(ERR_ARGS_WRONG_TYPE,
-            validationString,
-            expectedType.getSimpleName(),
-            actualType.getSimpleName()));
-      }
-    }
-
-    MethodParameter getParameter(UtamArgument utamArgument, TypeProvider expectedType) {
+    MethodParameter getParameter(UtamArgument utamArgument) {
       // predicate is not used as a parameter
       if (FUNCTION_TYPE_PROPERTY.equals(utamArgument.type)) {
-        checkExpectedType(expectedType, FUNCTION);
         return null;
       }
 
       MethodParameter parameter = utamArgument.value == null ?
           utamArgument.getArgByNameType()
-          : utamArgument.getArgByValue(translationContext);
-      checkExpectedType(expectedType, parameter.getType());
+          : utamArgument.getArgByValue(context);
 
       if (!parameter.isLiteral()) {
         parameters.forEach(arg -> {
@@ -207,8 +179,113 @@ class UtamArgument {
           }
         });
       }
-      parameters.add(parameter);
       return parameter;
+    }
+
+    void checkExpectedType(TypeProvider expectedType, TypeProvider actualType) {
+      if (expectedType != null && !actualType.isSameType(expectedType)) {
+        throw new UtamCompilationError(String.format(ERR_ARGS_WRONG_TYPE,
+            validationString,
+            expectedType.getSimpleName(),
+            actualType.getSimpleName()));
+      }
+    }
+
+    void checkParametersCount(UtamArgument[] args, int expectedCnt) {
+      int actualCnt = args == null ? 0 : args.length;
+      if (expectedCnt != actualCnt) {
+        throw new UtamCompilationError(String.format(ERR_ARGS_WRONG_COUNT,
+            validationString,
+            expectedCnt,
+            actualCnt));
+      }
+    }
+  }
+
+  /**
+   * args processor with a list of expected args types
+   *
+   * @since 236
+   */
+  static class ArgsProcessorWithExpectedTypes extends ArgsProcessor {
+
+    private final List<TypeProvider> expectedTypes;
+
+    ArgsProcessorWithExpectedTypes(TranslationContext translationContext, String validationString,
+        List<TypeProvider> expectedParametersTypes) {
+      super(translationContext, validationString);
+      this.expectedTypes = expectedParametersTypes;
+    }
+
+    ArgsProcessorWithExpectedTypes(TranslationContext context, MethodContext methodContext,
+        List<TypeProvider> expectedParametersTypes) {
+      this(context, String.format("method '%s'", methodContext.getName()), expectedParametersTypes);
+    }
+
+    ArgsProcessorWithExpectedTypes(TranslationContext context, String matcherContext, MatcherType matcherType) {
+      this(context, String.format("matcher '%s' for %s", matcherType, matcherContext), matcherType.getExpectedParametersTypes());
+    }
+
+    @Override
+    List<MethodParameter> getParameters(UtamArgument[] args) {
+      checkParametersCount(args, expectedTypes.size());
+      if (args != null) {
+        for (int i = 0; i < args.length; i++) {
+          MethodParameter parameter = getParameter(args[i]);
+          if(parameter!= null) { // function parameter is returned as null
+            checkExpectedType(expectedTypes.get(i), parameter.getType());
+            parameters.add(parameter);
+          }
+        }
+      }
+      return parameters;
+    }
+  }
+
+  /**
+   * basic action can have more than one possible set of parameter types
+   *
+   * @since 236
+   */
+  static class ArgsProcessorBasicAction extends ArgsProcessor {
+
+    private final List<List<TypeProvider>> parametersTypesOptions;
+    private final ActionType action;
+
+    ArgsProcessorBasicAction(TranslationContext translationContext, String validationString, ActionType actionType) {
+      super(translationContext, validationString);
+      parametersTypesOptions = actionType.getParametersTypesOptions();
+      this.action = actionType;
+    }
+
+    /**
+     * pick option of expected parameters types based on the number of provided args
+     * @param args transformed arguments
+     * @return proper args processor
+     */
+    private ArgsProcessor getMatchingProcessor(UtamArgument[] args) {
+      int argsCount = args == null? 0: args.length;
+      for (List<TypeProvider> expectedTypesOption : action.getParametersTypesOptions()) {
+        if (expectedTypesOption.size() == argsCount) {
+          ArgsProcessor argsProcessor = new ArgsProcessorWithExpectedTypes(context, validationString,
+              expectedTypesOption);
+          // if number and first expected type is a match
+          if(argsProcessor.getParameter(args[0]).getType().isSameType(expectedTypesOption.get(0))) {
+            return argsProcessor;
+          }
+        }
+      }
+      throw new UtamCompilationError("could not find matching parameters option for provided args");
+    }
+
+    @Override
+    List<MethodParameter> getParameters(UtamArgument[] args) {
+      UtamArgument[] transformedArgs = action.getTransformedArgs(args);
+      if (parametersTypesOptions.size() == 1) { // most action have one possible set of parameters
+        return new ArgsProcessorWithExpectedTypes(context, validationString,
+            parametersTypesOptions.get(0)).getParameters(transformedArgs);
+      }
+      return getMatchingProcessor(transformedArgs).getParameters(transformedArgs);
     }
   }
 }
