@@ -116,7 +116,7 @@ public class DriverAdapter implements Driver {
   }
 
   private Function<WebElement, Element> getElementBuilder() {
-    return element -> isMobile() ? new MobileElementAdapter(element) : new ElementAdapter(element);
+    return element -> isMobile() ? new MobileElementAdapter(element, this) : new ElementAdapter(element, this);
   }
 
   protected final void resetDriver(WebDriver driver) {

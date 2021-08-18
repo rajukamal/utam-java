@@ -11,7 +11,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
+import static utam.compiler.helpers.DraggableActionType.ERR_MULTIPLE_EXPECTED_ARGS_TYPES;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.draggable;
 import static utam.compiler.helpers.TypeUtilities.VOID;
@@ -85,5 +87,12 @@ public class DraggableActionTypeTests {
         BasicElementActionType.getActionType(
             action.getApplyString(), elementContext.getType(), elementContext.getName()),
         is(equalTo(action)));
+  }
+
+  @Test
+  public void testgetParameterTypesThrows() {
+    ActionType action = DraggableActionType.dragAndDrop;
+    IllegalStateException e = expectThrows(IllegalStateException.class, action::getParametersTypes);
+    assertThat(e.getMessage(), is(equalTo(ERR_MULTIPLE_EXPECTED_ARGS_TYPES)));
   }
 }

@@ -12,7 +12,6 @@ import static utam.core.selenium.element.DriverAdapter.find;
 import static utam.core.selenium.element.DriverAdapter.findList;
 import static utam.core.selenium.element.DriverAdapter.getNotFoundErr;
 import static utam.core.selenium.element.DriverAdapter.getSeleniumDriver;
-import static utam.core.selenium.element.DriverAdapter.getSeleniumDriverActions;
 
 import java.awt.Point;
 import java.util.Collections;
@@ -42,7 +41,7 @@ import utam.core.selenium.appium.MobileElementAdapter;
  */
 public class ElementAdapter implements Element {
 
-  public static final Element NULL_ELEMENT = new ElementAdapter(null);
+  public static final Element NULL_ELEMENT = new ElementAdapter(null, (WebDriver) null);
   public static final String SCROLL_TOP_VIA_JAVASCRIPT =
       "return arguments[0].scrollIntoView(true);";
   public static final String SCROLL_INTO_VIEW_JS =
@@ -64,9 +63,26 @@ public class ElementAdapter implements Element {
       "window.scrollTo(0,0);";
   static final String ERR_DRAG_AND_DROP_OPTIONS = "Either target element of offset should be set for drag and drop";
   private final WebElement webElement;
+  private final WebDriver driver;
+  protected final Driver driverAdapter;
 
-  public ElementAdapter(WebElement element) {
+  /**
+   * constructor
+   *
+   * @param element element instance
+   * @param driver  instance of the driver, might be needed if underlying framework does not have
+   *                implementation for some actions out of the box
+   */
+  public ElementAdapter(WebElement element, WebDriver driver) {
     this.webElement = element;
+    this.driver = driver;
+    this.driverAdapter = driver == null? null : new DriverAdapter(driver);
+  }
+
+  public ElementAdapter(WebElement element, Driver driverAdapter) {
+    this.webElement = element;
+    this.driver = getSeleniumDriver(driverAdapter);
+    this.driverAdapter = driverAdapter;
   }
 
   public WebElement getWebElement() {
@@ -77,8 +93,8 @@ public class ElementAdapter implements Element {
   }
 
   private Function<WebElement, Element> getElementBuilder() {
-    return element -> this instanceof MobileElementAdapter ? new MobileElementAdapter(element)
-        : new ElementAdapter(element);
+    return element -> this instanceof MobileElementAdapter ? new MobileElementAdapter(element, driverAdapter)
+        : new ElementAdapter(element, driver);
   }
 
   @Override
@@ -130,30 +146,30 @@ public class ElementAdapter implements Element {
   }
 
   @Override
-  public void deprecatedClick(Driver driver) {
-    driver.executeScript(CLICK_VIA_JAVASCRIPT, getWebElement());
+  public void deprecatedClick() {
+    driverAdapter.executeScript(CLICK_VIA_JAVASCRIPT, getWebElement());
   }
 
   @Override
-  public void scrollIntoView(Driver driver, ScrollOptions options) {
+  public void scrollIntoView(ScrollOptions options) {
     if (options == ScrollOptions.TOP) {
       if (isDisplayed()) {
         return;
       }
-      scrollWithCompliance(driver);
+      scrollWithCompliance(driverAdapter);
       if (isDisplayed()) {
         return;
       }
-      driver.executeScript(SCROLL_TOP_VIA_JAVASCRIPT, getWebElement());
+      driverAdapter.executeScript(SCROLL_TOP_VIA_JAVASCRIPT, getWebElement());
       if (!isDisplayed()) {
-        driver.executeScript(SCROLL_TO_DOCUMENT_ORIGIN_JS);
-        driver.executeScript(SCROLL_TOP_VIA_JAVASCRIPT, getWebElement());
+        driverAdapter.executeScript(SCROLL_TO_DOCUMENT_ORIGIN_JS);
+        driverAdapter.executeScript(SCROLL_TOP_VIA_JAVASCRIPT, getWebElement());
       }
       if (!isDisplayed()) {
         throw new ElementNotVisibleException(SCROLL_INTO_VIEW_ERR);
       }
     } else {
-      driver.executeScript(SCROLL_CENTER_VIA_JAVASCRIPT, getWebElement());
+      driverAdapter.executeScript(SCROLL_CENTER_VIA_JAVASCRIPT, getWebElement());
     }
   }
 
@@ -225,28 +241,27 @@ public class ElementAdapter implements Element {
   }
 
   @Override
-  public void moveTo(Driver driver) {
-    Actions actions = getSeleniumDriverActions(driver);
+  public void moveTo() {
+    Actions actions = new Actions(driver);
     actions.moveToElement(getWebElement()).perform();
   }
 
   @Override
-  public boolean hasFocus(Driver driver) {
-    WebDriver webDriver = getSeleniumDriver(driver);
-    return webDriver
+  public boolean hasFocus() {
+    return driver
         .switchTo()
         .activeElement()
         .equals(getWebElement());
   }
 
   @Override
-  public void blur(Driver driver) {
-    driver.executeScript(BLUR_VIA_JAVASCRIPT, getWebElement());
+  public void blur() {
+    driverAdapter.executeScript(BLUR_VIA_JAVASCRIPT, getWebElement());
   }
 
   @Override
-  public void focus(Driver driver) {
-    driver.executeScript(FOCUS_VIA_JAVASCRIPT, getWebElement());
+  public void focus() {
+    driverAdapter.executeScript(FOCUS_VIA_JAVASCRIPT, getWebElement());
   }
 
   @Override
@@ -255,15 +270,15 @@ public class ElementAdapter implements Element {
   }
 
   @Override
-  public void flick(Driver driver, int xOffset, int yOffset) {
+  public void flick(int xOffset, int yOffset) {
     throw new IllegalStateException(ERR_SUPPORTED_FOR_MOBILE);
   }
 
   @Override
-  public void dragAndDrop(Driver driver, DragAndDropOptions options) {
+  public void dragAndDrop(DragAndDropOptions options) {
     WebElement from = getWebElement();
     // create an object of Actions class to build composite actions
-    Actions builder = getSeleniumDriverActions(driver).clickAndHold(from);
+    Actions builder = new Actions(driver).clickAndHold(from);
     if(options.getHoldDuration() != null && !options.getHoldDuration().isZero()) {
       builder.pause(options.getHoldDuration());
     }

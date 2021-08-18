@@ -28,7 +28,7 @@ public interface ActionType {
   TypeProvider getReturnType();
 
   /**
-   * list of parameters types
+   * list of expected parameters types
    *
    * @return list
    */

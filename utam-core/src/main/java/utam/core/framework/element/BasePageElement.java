@@ -120,7 +120,7 @@ public class BasePageElement extends UtamBaseImpl implements RootElement {
 
   @Override
   public boolean isFocused() {
-    return getElement().hasFocus(getDriver());
+    return getElement().hasFocus();
   }
 
   @Override
@@ -193,7 +193,7 @@ public class BasePageElement extends UtamBaseImpl implements RootElement {
         return ((BasePageElement)target).getElement();
       }
     };
-    getElement().dragAndDrop(factory.getDriver(), options);
+    getElement().dragAndDrop(options);
   }
 
   @Override
@@ -204,7 +204,7 @@ public class BasePageElement extends UtamBaseImpl implements RootElement {
         return new Point(xOffset, yOffset);
       }
     };
-    getElement().dragAndDrop(factory.getDriver(), options);
+    getElement().dragAndDrop(options);
   }
 
   @Override
@@ -220,7 +220,7 @@ public class BasePageElement extends UtamBaseImpl implements RootElement {
         return Duration.ofSeconds(holdDurationSec);
       }
     };
-    getElement().dragAndDrop(factory.getDriver(), options);
+    getElement().dragAndDrop(options);
   }
 
   @Override
@@ -236,6 +236,6 @@ public class BasePageElement extends UtamBaseImpl implements RootElement {
         return Duration.ofSeconds(holdDurationSec);
       }
     };
-    getElement().dragAndDrop(factory.getDriver(), options);
+    getElement().dragAndDrop(options);
   }
 }

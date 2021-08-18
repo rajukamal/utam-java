@@ -33,6 +33,7 @@ public enum DraggableActionType implements ActionType {
       ELEMENT_PARAMETERS);
   private static final List<TypeProvider> OFFSET_PARAMETERS = new ArrayList<>();
   private static final List<TypeProvider> OFFSET_WITH_DURATION_PARAMETERS = new ArrayList<>();
+  static final String ERR_MULTIPLE_EXPECTED_ARGS_TYPES = "Draggable method supports more than one parameters combination";
 
   static {
     ELEMENT_WITH_DURATION_PARAMETERS.add(PrimitiveType.NUMBER);
@@ -53,8 +54,7 @@ public enum DraggableActionType implements ActionType {
 
   @Override
   public List<TypeProvider> getParametersTypes() {
-    throw new IllegalStateException(
-        "Draggable method supports more than one parameters combination");
+    throw new IllegalStateException(ERR_MULTIPLE_EXPECTED_ARGS_TYPES);
   }
 
   @Override

@@ -249,6 +249,8 @@ public class UtamArgument {
    */
   static class ArgsProcessorBasicAction extends ArgsProcessor {
 
+    static final String ERR_MATCHING_TYPES_NOT_FOUND = "%s: could not find matching parameters option for provided args";
+
     private final List<List<TypeProvider>> parametersTypesOptions;
     private final ActionType action;
 
@@ -259,23 +261,27 @@ public class UtamArgument {
     }
 
     /**
-     * pick option of expected parameters types based on the number of provided args
+     * pick expected parameters types based on the number of provided args and a match of the first
+     * arg type
+     *
      * @param args transformed arguments
      * @return proper args processor
      */
     private ArgsProcessor getMatchingProcessor(UtamArgument[] args) {
-      int argsCount = args == null? 0: args.length;
+      int argsCount = args == null ? 0 : args.length;
       for (List<TypeProvider> expectedTypesOption : action.getParametersTypesOptions()) {
         if (expectedTypesOption.size() == argsCount) {
-          ArgsProcessor argsProcessor = new ArgsProcessorWithExpectedTypes(context, validationString,
+          ArgsProcessor argsProcessor = new ArgsProcessorWithExpectedTypes(context,
+              validationString,
               expectedTypesOption);
-          // if number and first expected type is a match
-          if(argsProcessor.getParameter(args[0]).getType().isSameType(expectedTypesOption.get(0))) {
+          // if number of args and first expected type is a match
+          if (argsProcessor.getParameter(args[0]).getType()
+              .isSameType(expectedTypesOption.get(0))) {
             return argsProcessor;
           }
         }
       }
-      throw new UtamCompilationError("could not find matching parameters option for provided args");
+      throw new UtamCompilationError(String.format(ERR_MATCHING_TYPES_NOT_FOUND, validationString));
     }
 
     @Override
