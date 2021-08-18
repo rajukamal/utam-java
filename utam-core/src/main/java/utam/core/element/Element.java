@@ -7,6 +7,7 @@
  */
 package utam.core.element;
 
+import java.awt.Point;
 import java.time.Duration;
 import java.util.List;
 import utam.core.driver.Driver;
@@ -44,6 +45,7 @@ public interface Element {
 
   /**
    * provided as temporary workaround when regular click does not work
+   *
    * @param driver Driver instance used in deprecated click
    * @deprecated when all browsers work as expected, will be removed
    */
@@ -73,8 +75,9 @@ public interface Element {
   /**
    * drag and drop an element to the target location
    *
-   * @param options location where to drop as element or coordinates offset and optional hold duration
-   * @param driver instance of the driver, needed for custom actions
+   * @param options location where to drop as element or coordinates offset and optional hold
+   *                duration
+   * @param driver  instance of the driver, needed for custom actions
    */
   void dragAndDrop(Driver driver, DragAndDropOptions options);
 
@@ -96,26 +99,39 @@ public interface Element {
     RIGHT
   }
 
+  /**
+   * options for a drag and drop actions: element, offset and duration.
+   *
+   * @since 236
+   */
   interface DragAndDropOptions {
 
+    /**
+     * Duration of hold
+     *
+     * @return null by default
+     */
     default Duration getHoldDuration() {
       return null;
     }
 
+    /**
+     * Target position for drop, as an element
+     *
+     * @return null by default
+     */
     default Element getTargetElement() {
       return null;
     }
 
-    default CoordinatesOffset getOffset() {
+    /**
+     * Target position for drop, as offset coordinates
+     *
+     * @return null by default
+     */
+    default Point getOffset() {
       return null;
     }
 
-  }
-
-  interface CoordinatesOffset {
-
-    int getX();
-
-    int getY();
   }
 }

@@ -18,10 +18,16 @@ public interface Draggable extends BasicElement {
   /**
    * drag and drop an element to the target location
    *
-   * @param target location where to drop and
+   * @param target location where to drop
+   * @param holdDurationSec after clicking, hold for few seconds (emulates real user)
    */
   void dragAndDrop(BasicElement target, int holdDurationSec);
 
+  /**
+   * drag and drop an element to the target location
+   *
+   * @param target location where to drop
+   */
   void dragAndDrop(BasicElement target);
 
   /**
@@ -29,8 +35,15 @@ public interface Draggable extends BasicElement {
    *
    * @param xOffset horizontal offset
    * @param yOffset vertical offset
+   * @param holdDurationSec after clicking, hold for few seconds (emulates real user)
    */
   void dragAndDrop(int xOffset, int yOffset, int holdDurationSec);
 
+  /**
+   * drag and drop an element by offset
+   *
+   * @param xOffset horizontal offset
+   * @param yOffset vertical offset
+   */
   void dragAndDrop(int xOffset, int yOffset);
 }

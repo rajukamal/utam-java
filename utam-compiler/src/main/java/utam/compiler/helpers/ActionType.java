@@ -7,7 +7,6 @@
  */
 package utam.compiler.helpers;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import utam.compiler.grammar.UtamArgument;
@@ -52,8 +51,8 @@ public interface ActionType {
   String getApplyString();
 
   /**
-   * because "getClass()" is reserved method in Java, for this method invoked method will be getClassAttribute();
-   * in other cases method name is same as "apply" property value
+   * because "getClass()" is reserved method in Java, for this method invoked method will be
+   * getClassAttribute(); in other cases method name is same as "apply" property value
    *
    * @return string with method name to invoke
    */
@@ -61,6 +60,12 @@ public interface ActionType {
     return this.getApplyString();
   }
 
+  /**
+   * some actions can add default value to parameters, hence transforming originally passed args
+   *
+   * @param args declared args
+   * @return array or args
+   */
   default UtamArgument[] getTransformedArgs(UtamArgument[] args) {
     return args;
   }

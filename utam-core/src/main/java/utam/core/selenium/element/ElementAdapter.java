@@ -14,6 +14,7 @@ import static utam.core.selenium.element.DriverAdapter.getNotFoundErr;
 import static utam.core.selenium.element.DriverAdapter.getSeleniumDriver;
 import static utam.core.selenium.element.DriverAdapter.getSeleniumDriverActions;
 
+import java.awt.Point;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
@@ -270,8 +271,8 @@ public class ElementAdapter implements Element {
       WebElement to = ((ElementAdapter) options.getTargetElement()).getWebElement();
       builder.moveToElement(to).release(to);
     } else if(options.getOffset() != null) {
-      CoordinatesOffset offset = options.getOffset();
-      builder.moveByOffset(offset.getX(), offset.getY()).release();
+      Point offset = options.getOffset();
+      builder.moveByOffset((int) offset.getX(), (int) offset.getY()).release();
     } else {
       throw new UtamCoreError(ERR_DRAG_AND_DROP_OPTIONS);
     }

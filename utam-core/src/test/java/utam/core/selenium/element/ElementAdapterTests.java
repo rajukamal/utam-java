@@ -30,7 +30,7 @@ import static utam.core.selenium.element.ElementAdapter.SCROLL_TOP_VIA_JAVASCRIP
 import static utam.core.selenium.element.LocatorBy.byCss;
 import static utam.core.selenium.element.ShadowRootWebElement.*;
 
-import java.time.Duration;
+import java.awt.Point;
 import java.util.Collections;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -39,7 +39,6 @@ import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
 import utam.core.element.Element;
-import utam.core.element.Element.CoordinatesOffset;
 import utam.core.element.Element.DragAndDropOptions;
 import utam.core.element.Element.GestureDirection;
 import utam.core.element.Element.ScrollOptions;
@@ -273,18 +272,8 @@ public class ElementAdapterTests {
     MockUtilities mock = new MockUtilities.MockDriver();
     DragAndDropOptions options = new DragAndDropOptions() {
       @Override
-      public CoordinatesOffset getOffset() {
-        return new CoordinatesOffset() {
-          @Override
-          public int getX() {
-            return 0;
-          }
-
-          @Override
-          public int getY() {
-            return 0;
-          }
-        };
+      public Point getOffset() {
+        return new Point(0,0);
       }
     };
     mock.getElementAdapter().dragAndDrop(mock.getDriverAdapter(), options);

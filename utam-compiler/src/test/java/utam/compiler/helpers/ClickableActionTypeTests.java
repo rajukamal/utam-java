@@ -32,7 +32,7 @@ public class ClickableActionTypeTests {
   private static final String VOID_TYPE_NAME = "void";
 
   @SuppressWarnings({"unchecked", "rawtypes"})
-  static Method getMethod(Class clazz, String methodName, Class[] parameters) {
+  private static Method getMethod(Class clazz, String methodName, Class[] parameters) {
     try {
       return clazz.getDeclaredMethod(methodName, parameters);
     } catch (Exception e) {

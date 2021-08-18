@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import utam.core.declarative.representation.TypeProvider;
-import utam.core.element.Draggable;
 
 /**
  * Draggable action types enum links element actions with translator code

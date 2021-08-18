@@ -7,12 +7,12 @@
  */
 package utam.core.framework.element;
 
+import java.awt.Point;
 import java.time.Duration;
 import org.openqa.selenium.Keys;
 import utam.core.driver.Expectations;
 import utam.core.element.BasicElement;
 import utam.core.element.Element;
-import utam.core.element.Element.CoordinatesOffset;
 import utam.core.element.Element.DragAndDropOptions;
 import utam.core.element.RootElement;
 import utam.core.element.Element.GestureDirection;
@@ -200,18 +200,8 @@ public class BasePageElement extends UtamBaseImpl implements RootElement {
   public void dragAndDrop(int xOffset, int yOffset) {
     DragAndDropOptions options = new DragAndDropOptions() {
       @Override
-      public CoordinatesOffset getOffset() {
-        return new CoordinatesOffset() {
-          @Override
-          public int getX() {
-            return xOffset;
-          }
-
-          @Override
-          public int getY() {
-            return yOffset;
-          }
-        };
+      public Point getOffset() {
+        return new Point(xOffset, yOffset);
       }
     };
     getElement().dragAndDrop(factory.getDriver(), options);
@@ -237,18 +227,13 @@ public class BasePageElement extends UtamBaseImpl implements RootElement {
   public void dragAndDrop(int xOffset, int yOffset, int holdDurationSec) {
     DragAndDropOptions options = new DragAndDropOptions() {
       @Override
-      public CoordinatesOffset getOffset() {
-        return new CoordinatesOffset() {
-          @Override
-          public int getX() {
-            return xOffset;
-          }
+      public Point getOffset() {
+        return new Point(xOffset, yOffset);
+      }
 
-          @Override
-          public int getY() {
-            return yOffset;
-          }
-        };
+      @Override
+      public Duration getHoldDuration() {
+        return Duration.ofSeconds(holdDurationSec);
       }
     };
     getElement().dragAndDrop(factory.getDriver(), options);
